@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathLab — CET Practice</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e5e9f2;--primary:#5146e5;--good:#15803d;--bad:#dc2626;--soft:#eef0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,#25215f,#5146e5);color:#fff;padding:24px 18px}
+.wrap{max-width:1050px;margin:auto;padding:0 16px}header h1{margin:0;font-size:clamp(25px,4vw,36px)}header p{margin:6px 0 0;color:#e4e4ff}
+main{padding:22px 0 45px}.topgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 5px 18px #1c24500a;margin-bottom:16px}
+h2{font-size:18px;margin:0 0 12px}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-bottom:5px}select,input,button{font:inherit}select,input[type=number]{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--ink)}
+button{border:0;border-radius:10px;padding:10px 15px;font-weight:700;cursor:pointer;background:var(--primary);color:#fff}button.secondary{background:#eef0ff;color:#3730a3}button:disabled{opacity:.5;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#f8f9ff;border-radius:12px;padding:12px}.stat strong{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
+.progress{height:8px;background:#eceef5;border-radius:20px;overflow:hidden;margin-top:12px}.progress>div{height:100%;width:0;background:var(--primary);transition:width .2s}
+.question-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:12px;background:var(--soft);color:#3730a3;border-radius:99px;padding:5px 10px;font-weight:700}.timer{font-weight:800;font-variant-numeric:tabular-nums}.prompt{font-size:21px;font-weight:700;margin:18px 0 12px;line-height:1.4}.visual{min-height:70px;display:flex;align-items:center;justify-content:center;margin:8px 0 16px;overflow:hidden}.visual svg{max-width:100%;height:auto}
+.options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.option{background:#fff;color:var(--ink);border:1px solid var(--line);text-align:left;padding:13px}.option:hover{border-color:var(--primary);background:#fafaff}.option.correct{border-color:var(--good);background:#ecfdf3;color:#166534}.option.wrong{border-color:var(--bad);background:#fef2f2;color:#991b1b}
+.feedback{margin-top:14px;padding:12px;border-radius:10px;display:none}.feedback.show{display:block}.feedback.good{background:#ecfdf3;color:#166534}.feedback.bad{background:#fef2f2;color:#991b1b}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.small{font-size:12px;color:var(--muted)}.focus-row{margin:10px 0}.focus-row div:first-child{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}.bar{height:8px;border-radius:20px;background:#eceef5;overflow:hidden}.bar i{display:block;height:100%;background:#f59e0b}
+.hidden{display:none!important}.history{max-height:220px;overflow:auto}.history-item{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px}
+@media(max-width:720px){.topgrid{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(2,1fr)}.options{grid-template-columns:1fr}.prompt{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>MathLab <span style="font-weight:400">| CET Practice</span></h1><p>Randomized Math drills for trigonometry, geometry, algebra, roots, fractions, and logarithms.</p></div></header>
+<main class="wrap">
+  <section class="topgrid">
+    <div class="card">
+      <h2>Practice setup</h2>
+      <div class="controls">
+        <div><label for="topic">TOPIC</label><select id="topic"><option value="all">All topics</option><option value="trig">Trigonometry</option><option value="geometry">Geometry</option><option value="fractions">Fractions</option><option value="roots">Squares & roots</option><option value="logs">Logarithms</option><option value="algebra">Algebra</option></select></div>
+        <div><label for="difficulty">DIFFICULTY</label><select id="difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+        <div><label for="duration">TIME / QUESTION</label><select id="duration"><option value="30">30 seconds</option><option value="45" selected>45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="0">No timer</option></select></div>
+      </div>
+      <div class="actions"><button id="startBtn">Start practice</button><button class="secondary" id="resetBtn">Reset session</button></div>
+      <p class="small">Questions are generated locally in your browser. No API key or internet connection is required.</p>
+    </div>
+    <div class="card">
+      <h2>Session overview</h2>
+      <div class="stats">
+        <div class="stat"><strong id="score">0</strong><span>Correct</span></div>
+        <div class="stat"><strong id="attempts">0</strong><span>Attempted</span></div>
+        <div class="stat"><strong id="accuracy">0%</strong><span>Accuracy</span></div>
+        <div class="stat"><strong id="streak">0</strong><span>Best streak</span></div>
+      </div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <p class="small" id="progressText">Start a session to track your progress.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="question-head"><div><span class="pill" id="topicPill">READY</span> <span class="pill" id="difficultyPill">MEDIUM</span></div><div class="timer" id="timer">⏱ --</div></div>
+    <div class="prompt" id="question">Choose your settings, then press “Start practice”.</div>
+    <div class="visual" id="visual"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button id="nextBtn" disabled>Next question →</button><button class="secondary" id="hintBtn" disabled>Show a hint</button></div>
+  </section>
+
+  <section class="topgrid">
+    <div class="card"><h2>Areas to focus on</h2><p class="small">Topics are ranked by your missed questions. Practice the highest bars first.</p><div id="focusAreas"><p class="small">Your focus report will appear after you answer questions.</p></div></div>
+    <div class="card"><h2>Recent answers</h2><div class="history" id="history"><p class="small">No answers yet.</p></div></div>
+  </section>
+</main>
+<footer>MathLab CET Practice • Single-file HTML, CSS & JavaScript • Progress stays only in this page session.</footer>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick = arr=>arr[rand(0,arr.length-1)];
+const round = (n,d=2)=>Number(n.toFixed(d));
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+const frac=(n,d)=>{let g=gcd(n,d);return `${n/g}/${d/g}`};
+const topics={trig:"Trigonometry",geometry:"Geometry",fractions:"Fractions",roots:"Squares & roots",logs:"Logarithms",algebra:"Algebra"};
+let current=null, locked=true, timerId=null, secondsLeft=0, score=0, attempts=0, streak=0, bestStreak=0, answered=0;
+let misses={trig:0,geometry:0,fractions:0,roots:0,logs:0,algebra:0}, totals={...misses}, history=[];
+
+function svgTriangle(a,b,c,labelA="θ"){
+ return `<svg viewBox="0 0 330 180" role="img" aria-label="Right triangle diagram"><path d="M55 145 L270 145 L270 35 Z" fill="#eef0ff" stroke="#5146e5" stroke-width="3"/><path d="M253 145 L253 128 L270 128" fill="none" stroke="#5146e5" stroke-width="2"/><path d="M83 145 A28 28 0 0 0 81 132" fill="none" stroke="#f59e0b" stroke-width="2"/><text x="88" y="133" fill="#92400e" font-size="13">${labelA}</text><text x="145" y="164" fill="#172033" font-size="13">${a}</text><text x="280" y="92" fill="#172033" font-size="13">${b}</text><text x="145" y="82" fill="#172033" font-size="13">${c}</text></svg>`;
+}
+function svgCircle(r){return `<svg viewBox="0 0 320 170" role="img" aria-label="Circle diagram"><circle cx="160" cy="85" r="58" fill="#eef0ff" stroke="#5146e5" stroke-width="3"/><path d="M160 85 L218 85 M160 85 L201 43" stroke="#f59e0b" stroke-width="3"/><circle cx="160" cy="85" r="3" fill="#172033"/><text x="164" y="77" font-size="12">center</text><text x="184" y="105" font-size="13">r = ${r}</text></svg>`}
+function makeQ(topic,diff){
+ const level={easy:1,medium:2,hard:3}[diff];
+ const q=(t,p,ans,exp,visual="",hint="")=>({topic:t,prompt:p,answer:String(ans),explanation:exp,visual,hint:hint||exp});
+ const trig=()=>{
+  let type=rand(1,5);
+  if(type===1){let angle=pick([0,30,45,60,90]);let vals={0:["0","1","0"],30:["1/2","√3/2","√3/3"],45:["√2/2","√2/2","1"],60:["√3/2","1/2","√3"],90:["1","0","undefined"]};let k=rand(0,2),name=["sin","cos","tan"][k];return q("trig",`What is ${name}(${angle}°)?`,vals[angle][k],`${name}(${angle}°) = ${vals[angle][k]}. Memorize the special-angle values.`,"", "Recall the 30°–60°–90° and 45°–45°–90° triangles.");}
+  if(type===2){let a=level===1?3:rand(3,8),b=level===1?4:rand(3,8),h=Math.sqrt(a*a+b*b);let known=pick(["sin","cos","tan"]),ans=known==="sin"?`${a}/${round(h)}`:known==="cos"?`${b}/${round(h)}`:`${a}/${b}`;return q("trig",`In a right triangle, the opposite side is ${a} and adjacent side is ${b}. Find tan(θ).`,frac(a,b),`TOA: tan(θ) = opposite ÷ adjacent = ${a}/${b} = ${frac(a,b)}.`,svgTriangle(b,a,round(h)),"Use TOA: tangent = opposite / adjacent.");}
+  if(type===3){let x=pick([30,45,60]),name=pick(["sin","cos"]);return q("trig",`Evaluate ${name}(${x}°) × 2.`,name==="sin"?(x===30?"1":x===45?"√2":"√3"): (x===30?"√3":x===45?"√2":"1"),`Use the special-angle value of ${name}(${x}°), then multiply by 2.`, "", "Recall the exact special-angle values.");}
+  if(type===4){let opp=rand(3,12),hyp=opp*2;return q("trig",`If sin(θ) = ${opp}/${hyp}, what is the opposite side when the hypotenuse is ${hyp}?`,String(opp),`sin(θ) = opposite/hypotenuse, so opposite = (${opp}/${hyp}) × ${hyp} = ${opp}.`,svgTriangle("adjacent","opposite", "hypotenuse"),"Multiply sine by the hypotenuse.");}
+  let a=rand(1,8);return q("trig",`If sin²(θ) + cos²(θ) = 1 and sin(θ) = ${a}/${a+1}, what is cos²(θ)?`,round(1-(a/(a+1))**2,4),`cos²(θ) = 1 − sin²(θ) = 1 − (${a}/${a+1})² = ${round(1-(a/(a+1))**2,4)}.`,"","Use the Pythagorean identity.");
+ };
+ const geometry=()=>{
+  let type=rand(1,5),a=rand(3,15),b=rand(3,15);
+  if(type===1)return q("geometry",`Find the area of a triangle with base ${a} cm and height ${b} cm.`,round(a*b/2),`Area = ½ × base × height = ½ × ${a} × ${b} = ${a*b/2} cm².`);
+  if(type===2)return q("geometry",`Find the area of a circle with radius ${a} cm. (Use π = 3.14)`,round(3.14*a*a),`A = πr² = 3.14 × ${a}² = ${round(3.14*a*a)} cm².`,svgCircle(a),"Use A = πr².");
+  if(type===3)return q("geometry",`A rectangle is ${a} cm long and ${b} cm wide. What is its perimeter?`,2*(a+b),`P = 2(l + w) = 2(${a} + ${b}) = ${2*(a+b)} cm.`);
+  if(type===4){let c=Math.sqrt(a*a+b*b);return q("geometry",`A right triangle has legs ${a} and ${b}. Find its hypotenuse.`,round(c,2),`Pythagorean theorem: c = √(${a}² + ${b}²) = ${round(c,2)}.` ,svgTriangle(a,b,"c"),"Use a² + b² = c².");}
+  return q("geometry",`A square has a side length of ${a} cm. Find its area.`,a*a,`Area of a square = side² = ${a}² = ${a*a} cm².`);
+ };
+ const fractions=()=>{
+  let a=rand(1,9),b=rand(2,10),c=rand(1,9),d=rand(2,10),type=rand(1,3);
+  if(type===1){let n=a*d+c*b,den=b*d;return q("fractions",`Add and simplify: ${a}/${b} + ${c}/${d}`,frac(n,den),`Find a common denominator: (${a}×${d} + ${c}×${b})/(${b}×${d}) = ${frac(n,den)}.`);}
+  if(type===2)return q("fractions",`Multiply and simplify: ${a}/${b} × ${c}/${d}`,frac(a*c,b*d),`Multiply numerators and denominators: (${a}×${c})/(${b}×${d}) = ${frac(a*c,b*d)}.`);
+  return q("fractions",`Convert ${a}/${b} to a decimal.`,round(a/b,3),`${a} ÷ ${b} = ${round(a/b,3)}.`);
+ };
+ const roots=()=>{
+  let n=rand(2,15),type=rand(1,3);
+  if(type===1){let x=n*n+pick([-2,-1,1,2]);return q("roots",`Estimate √${x} to 2 decimal places.`,round(Math.sqrt(x)),`√${x} ≈ ${round(Math.sqrt(x))}. It is between nearby perfect squares.`);}
+  if(type===2)return q("roots",`What is the value of ${n}²?`,n*n,`${n}² = ${n} × ${n} = ${n*n}.`);
+  let sq=pick([2,3,5,6,7,10]);return q("roots",`Simplify √${sq*sq*pick([2,3,5])}.`,`${sq}√${pick([2,3,5])}`,`Factor out the perfect-square factor. For example, √(${sq}² × k) = ${sq}√k.`,"","Look for the largest perfect-square factor.");
+ };
+ const logs=()=>{
+  let base=pick([2,3,5,10]),power=rand(1,level===1?3:level===2?4:6),n=base**power;
+  if(level===3&&rand(0,1))return q("logs",`Evaluate log${base}(${n}) + log${base}(${base}).`,power+1,`log base b of bⁿ = n. Therefore ${power} + 1 = ${power+1}.`);
+  return q("logs",`Evaluate log${base}(${n}).`,power,`Because ${base}^${power} = ${n}, log${base}(${n}) = ${power}.`,"","Ask: what exponent makes the base equal the number?");
+ };
+ const algebra=()=>{
+  let x=rand(2,12),a=rand(2,6),b=rand(1,15);
+  if(rand(0,1))return q("algebra",`Solve for x: ${a}x + ${b} = ${a*x+b}.`,x,`Subtract ${b}: ${a}x = ${a*x}. Divide by ${a}: x = ${x}.`);
+  return q("algebra",`Expand: (x + ${a})(x + ${b}).`,`x² + ${a+b}x + ${a*b}`,`FOIL: x² + ${b}x + ${a}x + ${a*b} = x² + ${a+b}x + ${a*b}.`);
+ };
+ let pool={trig,geometry,fractions,roots,logs,algebra};
+ if(topic!=="all")return pool[topic]();
+ return pick(Object.keys(pool).filter(k=>k!=="algebra"||level>0).map(k=>pool[k]))();
+}
+function makeChoices(q){
+ let correct=q.answer, vals=[correct];
+ const n=Number(correct);
+ if(Number.isFinite(n)){
+  let step=Math.max(1,Math.abs(n)*.15);
+  while(vals.length<4){let v=round(n+pick([-3,-2,-1,1,2,3])*step/2,2);if(!vals.some(x=>String(x)===String(v)))vals.push(String(v));}
+ }else{
+  let pool=["1/2","1/3","2/3","√2","√3","0","1","2","3","4","x² + 2x + 1","x² + 3x + 2"];
+  while(vals.length<4){let v=pick(pool);if(!vals.includes(v))vals.push(v);}
+ }
+ return vals.sort(()=>Math.random()-.5);
+}
+function start(){
+ clearInterval(timerId);score=attempts=streak=bestStreak=answered=0;misses={trig:0,geometry:0,fractions:0,roots:0,logs:0,algebra:0};totals={...misses};history=[];
+ updateStats();renderFocus();$("history").innerHTML='<p class="small">No answers yet.</p>';newQuestion();
+}
+function newQuestion(){
+ clearInterval(timerId);locked=false;
+ const topic=$("topic").value,diff=$("difficulty").value;
+ current=makeQ(topic,diff);$("topicPill").textContent=topics[current.topic].toUpperCase();$("difficultyPill").textContent=diff.toUpperCase();
+ $("question").textContent=current.prompt;$("visual").innerHTML=current.visual||"";$("feedback").className="feedback";$("feedback").textContent="";
+ $("hintBtn").disabled=false;$("nextBtn").disabled=true;
+ $("options").innerHTML="";
+ makeChoices(current).forEach((v,i)=>{let btn=document.createElement("button");btn.className="option";btn.textContent=String.fromCharCode(65+i)+". "+v;btn.onclick=()=>answer(v,btn);$("options").appendChild(btn);});
+ secondsLeft=Number($("duration").value);showTimer();
+ if(secondsLeft>0)timerId=setInterval(()=>{secondsLeft--;showTimer();if(secondsLeft<=0){clearInterval(timerId);if(!locked)timeOut();}},1000);
+}
+function showTimer(){$("timer").textContent=secondsLeft>0?`⏱ ${secondsLeft}s`:"⏱ ∞";}
+function timeOut(){if(locked)return;locked=true;attempts++;totals[current.topic]++;misses[current.topic]++;streak=0;showFeedback(false,"Time is up. Correct answer: "+current.answer+". "+current.explanation);finishQuestion();}
+function answer(value,btn){
+ if(locked)return;locked=true;clearInterval(timerId);attempts++;totals[current.topic]++;
+ const correct=String(value)===String(current.answer) || (Number.isFinite(Number(value))&&Number.isFinite(Number(current.answer))&&Math.abs(Number(value)-Number(current.answer))<0.011);
+ document.querySelectorAll(".option").forEach(b=>{b.disabled=true;if(b.textContent.slice(3)===current.answer)b.classList.add("correct");});
+ if(correct){score++;streak++;bestStreak=Math.max(bestStreak,streak);btn.classList.add("correct");showFeedback(true,"Correct! "+current.explanation);}
+ else{misses[current.topic]++;streak=0;btn.classList.add("wrong");showFeedback(false,"Not quite. Correct answer: "+current.answer+". "+current.explanation);}
+ finishQuestion();
+}
+function showFeedback(ok,msg){$("feedback").className="feedback show "+(ok?"good":"bad");$("feedback").textContent=msg;}
+function finishQuestion(){
+ answered++;$("nextBtn").disabled=false;$("hintBtn").disabled=true;updateStats();renderFocus();
+ history.unshift({topic:topics[current.topic],prompt:current.prompt,ok:$("feedback").classList.contains("good")});
+ $("history").innerHTML=history.slice(0,8).map(h=>`<div class="history-item">${h.ok?"✅":"❌"} <b>${h.topic}</b> — ${escapeHTML(h.prompt)}</div>`).join("");
+}
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function updateStats(){
+ $("score").textContent=score;$("attempts").textContent=attempts;$("accuracy").textContent=(attempts?Math.round(score/attempts*100):0)+"%";$("streak").textContent=bestStreak;
+ $("progressBar").style.width=(attempts?score/attempts*100:0)+"%";$("progressText").textContent=attempts?`${score} correct out of ${attempts} attempted.`:"Start a session to track your progress.";
+}
+function renderFocus(){
+ const rows=Object.keys(misses).map(k=>({k,rate:totals[k]?misses[k]/totals[k]:0,miss:misses[k],total:totals[k]})).sort((a,b)=>b.rate-a.rate||b.miss-a.miss);
+ const used=rows.filter(r=>r.total>0);
+ if(!used.length){$("focusAreas").innerHTML='<p class="small">Your focus report will appear after you answer questions.</p>';return;}
+ $("focusAreas").innerHTML=used.map(r=>`<div class="focus-row"><div><span>${topics[r.k]} <span class="small">(${r.miss}/${r.total} missed)</span></span><b>${Math.round(r.rate*100)}%</b></div><div class="bar"><i style="width:${r.rate*100}%"></i></div></div>`).join("");
+}
+$("startBtn").onclick=start;$("resetBtn").onclick=()=>{clearInterval(timerId);locked=true;current=null;score=attempts=streak=bestStreak=answered=0;misses={trig:0,geometry:0,fractions:0,roots:0,logs:0,algebra:0};totals={...misses};history=[];$("question").textContent='Choose your settings, then press “Start practice”.';$("options").innerHTML="";$("visual").innerHTML="";$("feedback").className="feedback";$("timer").textContent="⏱ --";$("nextBtn").disabled=true;$("hintBtn").disabled=true;updateStats();renderFocus();$("history").innerHTML='<p class="small">No answers yet.</p>';};
+$("nextBtn").onclick=()=>{if(!locked)return;newQuestion();};
+$("hintBtn").onclick=()=>{if(current&&!locked){$("feedback").className="feedback show";$("feedback").textContent="Hint: "+current.hint;}};
+</script>
+</body>
+</html>
